@@ -17,11 +17,12 @@ class DuplicatesPipeline(object):
         if isinstance(item, PrecioItem):
             return item
 
+        id_ = item.get("id")
         # esto puede ocupar mucha memoria \o/
-        if item.get("id") in self.ids_seen:
-            raise DropItem("Duplicate item found: %s" % item)
+        if id_ and id_ in self.ids_seen:
+            raise DropItem(f"Duplicate item found: {id_}")
         else:
-            self.ids_seen.add(item.get("id"))
+            self.ids_seen.add(id_)
             return item
 
 
