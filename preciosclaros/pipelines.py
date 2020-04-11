@@ -43,8 +43,9 @@ class MultiCSVItemPipeline:
         today = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         data = Path("data/")
         data.mkdir(exist_ok=True)
+
         self.files = {
-            name: (data / f"{name}-{spider.porcion}-{today}.csv").open("w+b") for name in MultiCSVItemPipeline.items
+            name: (data / f"{name}-{spider.porcion}-{spider.total_spiders}-{today}.csv").open("w+b") for name in MultiCSVItemPipeline.items
         }
         self.exporters = {name: CsvItemExporter(self.files[name]) for name in MultiCSVItemPipeline.items}
         for e in self.exporters.values():

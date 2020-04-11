@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
+import math
 from datetime import datetime
 import scrapy
 from preciosclaros.items import SucursalItem, ProductoItem, PrecioItem
 
 
 HEADERS = {
-    "x-api-key": "qfcNgctUb27Qw5w07u0sA5pNfp51Q9mo9XhIuZpw",
+    # "x-api-key": "qfcNgctUb27Qw5w07u0sA5pNfp51Q9mo9XhIuZpw",
     "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.89 Safari/537.36",
 }
 
@@ -23,25 +24,29 @@ productos_url = base_url + "prod/productos"  # ?id_sucursal
 # (aproximadamente) por cada ejecucion, a traves de un argumento que se pasa el scrapper,
 # programando la corrida de una porcion diferente cada dia.
 #
-# Note: seria más simple directamente separar "la porcion" a recorrer en un unico spider en funcion del dia en
-# que se corre`(e.j `` datetime.datetime.today().weekday()``), pero de esta manera se puede incluso programar
-# más de una instancia, pudiendo tener jobs simultaneos de distintos spiders, lo que aumentaria la frecuencia
-#
 
-TOTAL_SPIDERS = 7
-LIMIT = 50
 
+LIMIT_SUCURSALES = 30
+LIMIT_PRODUCTOS = 50
 
 class PreciosClarosSpider(scrapy.Spider):
     name = "preciosclaros"
 
-    def __init__(self, porcion=0, exportar=False, *args, **kwargs):
-        self.porcion = porcion
+    def __init__(self, porcion="1/7", exportar=False, sucursales=1, productos=1, precios=1, *args, **kwargs):
+        if "/" in porcion:
+            self.porcion, self.total_spiders = [int(i) for i in porcion.split("/")]
+            assert 1 <= self.porcion <= self.total_spiders
+        else:
+            self.porcion, self.total_spiders = 1, 1
+
         self.exportar = exportar
+        self.sucursales = bool(int(sucursales))
+        self.productos = bool(int(productos))
+        self.precios = bool(int(precios))
         super().__init__(*args, **kwargs)
 
     def start_requests(self):
-        yield scrapy.Request(url=sucursales_url + "?limit=50", callback=self.parse_sucursal_first_page, headers=HEADERS)
+        yield scrapy.Request(url=sucursales_url + f"?limit={LIMIT_SUCURSALES}", callback=self.parse_sucursal_first_page, headers=HEADERS)
 
     def parse_sucursal_first_page(self, response):
         """
@@ -54,14 +59,19 @@ class PreciosClarosSpider(scrapy.Spider):
         """
         json_data = json.loads(response.text)
         total = json_data["total"]
-        sucursales_por_spider = int(total / TOTAL_SPIDERS // LIMIT) * LIMIT
-        start = sucursales_por_spider * int(self.porcion)
+
+        sucursales_por_spider = int(math.ceil((total / self.total_spiders)))
+        self.logger.info(f"{total} sucursales en {self.total_spiders} spiders: {sucursales_por_spider} por spider")
+
+        if not self.sucursales:
+            return
+        start = sucursales_por_spider * (self.porcion - 1)
         end = start + sucursales_por_spider
 
         # process pages
-        for offset in range(start, end, LIMIT):
+        for offset in range(start, end, LIMIT_SUCURSALES):
             yield scrapy.Request(
-                url=sucursales_url + "?limit={}&offset={}".format(LIMIT, offset),
+                url=sucursales_url + f"?limit={LIMIT_SUCURSALES}&offset={offset}",
                 callback=self.parse_sucursal,
                 headers=HEADERS,
                 meta={"offset": offset, "end": end},
@@ -75,28 +85,31 @@ class PreciosClarosSpider(scrapy.Spider):
         Luego, por cada sucursal se genera un request a la primer
         pagina de los productos
         """
+        import ipdb; ipdb.set_trace()
         self.logger.info("Obteniendo sucursales %s/%s", response.meta.get("offset"), response.meta.get("end"))
         sucursales = json.loads(response.text)["sucursales"]
         for suc in sucursales:
             item = SucursalItem(suc)
             id_sucursal = item["id"]
             yield item
-            yield scrapy.Request(
-                url=productos_url + "?limit={}&id_sucursal={}".format(LIMIT, id_sucursal),
-                callback=self.parse_productos_first_page,
-                headers=HEADERS,
-                meta={"id_sucursal": id_sucursal},
-            )
+            if self.productos:
+                yield scrapy.Request(
+                    url=productos_url + f"?limit={LIMIT_PRODUCTOS}&id_sucursal={id_sucursal}",
+                    callback=self.parse_productos_first_page,
+                    headers=HEADERS,
+                    meta={"id_sucursal": id_sucursal},
+                )
 
     def parse_productos_first_page(self, response):
         json_data = json.loads(response.text)
         total = json_data["total"]
         # procesar  items de la primera pagina ya solicitada
         self.parse_productos_y_precios(response, total)
+        id_sucursal = response.meta["id_sucursal"]
 
-        for offset in range(LIMIT, total, LIMIT):
+        for offset in range(LIMIT_PRODUCTOS, total, LIMIT_PRODUCTOS):
             yield scrapy.Request(
-                url=productos_url + "?limit=50&offset={}&id_sucursal={}".format(offset, response.meta["id_sucursal"]),
+                url=productos_url + f"?limit={LIMIT_PRODUCTOS}&offset={offset}&id_sucursal={id_sucursal}",
                 callback=self.parse_productos_y_precios,
                 headers=HEADERS,
                 meta={"offset": offset, "total": total, "id_sucursal": response.meta["id_sucursal"]},
@@ -126,14 +139,15 @@ class PreciosClarosSpider(scrapy.Spider):
 
             producto = ProductoItem(prod)
             items.append(producto)
-            items.append(
-                PrecioItem(
-                    precio=precio,
-                    precio_max=precio_max,
-                    precio_min=precio_min,
-                    sucursal_id=response.meta["id_sucursal"],
-                    producto_id=producto["id"],
-                    fecha_relevamiento=datetime.utcnow(),
+            if self.precios:
+                items.append(
+                    PrecioItem(
+                        precio=precio,
+                        precio_max=precio_max,
+                        precio_min=precio_min,
+                        sucursal_id=response.meta["id_sucursal"],
+                        producto_id=producto["id"],
+                        fecha_relevamiento=datetime.utcnow(),
+                    )
                 )
-            )
         return items
