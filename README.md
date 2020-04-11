@@ -12,15 +12,15 @@ horas en completarse. Lo que se hace es correr diferentes
 Para una ejecución manual que genera archivos CSV:
 
 ```
-$ scrapy crawl preciosclaros -a porcion=<PARTE>/<TOTAL_PARTES> -a exportar=1
+$ scrapy crawl preciosclaros -a porcion=<PARTE>/<TOTAL_PARTES> -a exportar=1 --loglevel=INFO
 ```
 
-Por ejemplo, si `porcion` es 1/7 (default), bajará el primer séptimo del total
-de sucursales, si es 2/3 bajará el segundo tercio, etc.
+Por ejemplo, si `porcion` es `1/7` (default), bajará el primer séptimo del total de sucursales, si es 2/3 bajará el segundo tercio, etc.
 
 El parámetro `exportar` es recibido por el spider y permite que un pipeline
 escriba cada item a un CSV en
 `data/<tipo_item>-<porcion>-<cantidad_porciones-<marca_de_tiempo_inicial>.csv`
+donde tipo de item es sucursal, producto o precio.
 
 Tambien se pueden desactivar la descarga de productos con `-a productos=0` y
 precios con `-a precios=0`
