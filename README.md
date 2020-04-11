@@ -18,7 +18,7 @@ $ scrapy crawl preciosclaros -a porcion=<PORCION> -a exportar=1
 Siendo `<PORCION>` un valor entero entre 0 y 6. El valor por defecto es 0.
 
 El parámetro `exportar` es recibido por el spider y permite que un pipeline
-escriba cada item a un CSV distinto con nombre en
+escriba cada item a un CSV en
 `data/<tipo_item>-<porcion>-<marca_de_tiempo_inicial>.csv`
 
 
