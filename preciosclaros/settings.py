@@ -30,6 +30,15 @@ ITEM_PIPELINES = {
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 CONCURRENT_REQUESTS = 16
 
+
+RETRY_ENABLED = True
+RETRY_TIMES = 4
+RETRY_HTTP_CODES = [403, 500, 502, 503, 504, 522, 524, 408, 429]
+RETRY_PRIORITY_ADJUST = -1
+
+AUTOTHROTTLE_ENABLED = True
+
+
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
