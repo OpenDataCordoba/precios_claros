@@ -22,7 +22,7 @@ escriba cada item a un CSV en
 `data/<tipo_item>-<porcion>-<marca_de_tiempo_inicial>.csv`
 
 
-Alternativamente, se puede ejecutar en la plataforma [scrapinghub](https://scrapinghub.com/scrapy-cloud/).
+Alternativamente, se puede ejecutar en la plataforma [Scrapy Cloud](https://scrapinghub.com/scrapy-cloud/).
 
 
 ## Notas
