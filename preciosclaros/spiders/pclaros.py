@@ -85,7 +85,6 @@ class PreciosClarosSpider(scrapy.Spider):
         Luego, por cada sucursal se genera un request a la primer
         pagina de los productos
         """
-        import ipdb; ipdb.set_trace()
         self.logger.info("Obteniendo sucursales %s/%s", response.meta.get("offset"), response.meta.get("end"))
         sucursales = json.loads(response.text)["sucursales"]
         for suc in sucursales:
