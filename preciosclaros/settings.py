@@ -22,7 +22,8 @@ NEWSPIDER_MODULE = 'preciosclaros.spiders'
 ROBOTSTXT_OBEY = False
 
 ITEM_PIPELINES = {
-    'preciosclaros.pipelines.DuplicatesPipeline': 300,
+    'preciosclaros.pipelines.DuplicatesPipeline': 100,
+    'preciosclaros.pipelines.MultiCSVItemPipeline': 200,
 }
 
 

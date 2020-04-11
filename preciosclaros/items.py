@@ -3,7 +3,7 @@ import scrapy
 
 
 class SucursalItem(scrapy.Item):
-    
+    id = scrapy.Field()
     sucursalTipo = scrapy.Field()
     direccion = scrapy.Field()
     provincia = scrapy.Field()
@@ -15,19 +15,20 @@ class SucursalItem(scrapy.Item):
     lng = scrapy.Field()
     sucursalNombre = scrapy.Field()
     comercioId = scrapy.Field()
-    id = scrapy.Field()
     sucursalId = scrapy.Field()
 
 
 class ProductoItem(scrapy.Item):
-	nombre = scrapy.Field()
-	presentacion = scrapy.Field()
-	marca = scrapy.Field()
-	id = scrapy.Field()
+    id = scrapy.Field()
+    nombre = scrapy.Field()
+    presentacion = scrapy.Field()
+    marca = scrapy.Field()
 
 
 class PrecioItem(scrapy.Item):
-	sucursal_id = scrapy.Field() 
-	producto_id = scrapy.Field()
-	precio = scrapy.Field()
-	fecha_relevamiento = scrapy.Field(serializer=str)
+    sucursal_id = scrapy.Field()
+    producto_id = scrapy.Field()
+    precio = scrapy.Field()
+    precio_max = scrapy.Field()
+    precio_min = scrapy.Field()
+    fecha_relevamiento = scrapy.Field(serializer=str)
