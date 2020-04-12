@@ -7,8 +7,10 @@ from preciosclaros.items import SucursalItem, ProductoItem, PrecioItem
 
 
 HEADERS = {
-    # "x-api-key": "qfcNgctUb27Qw5w07u0sA5pNfp51Q9mo9XhIuZpw",
-    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/53.0.2785.89 Safari/537.36",
+    "x-api-key": "zIgFou7Gta7g87VFGL9dZ4BEEs19gNYS1SOQZt96",
+    "referer": "https://www.preciosclaros.gob.ar",
+    "sec-fetch-mode": "cors",
+    "user-agent": "User-Agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36",
 }
 
 base_url = "https://d3e6htiiul5ek9.cloudfront.net/"
