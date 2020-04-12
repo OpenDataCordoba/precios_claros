@@ -3,10 +3,19 @@
 Un crawler (basado en Scrapy) para descargar todos los productos, precios y
 sucursales listadas en este portal de precios al consumidor.
 
+## Instalación
+
+En un virtualenv con Python 3.6+
+
+```
+$ pip install -r requirements.txt
+$ pip install -e .
+```
+
 ## Ejecución local
 
-Por la gran cantidad de items que se descargan, el proceso demora varias
-horas en completarse. Lo que se hace es correr diferentes
+Por la gran cantidad de items que se descargan, el proceso de un scrapeo completo
+demora varias horas en completarse. Por ello el spider soporta diferentes
 "chunks" o porciones de las sucursales disponibles.
 
 Para una ejecución manual que genera archivos CSV:
@@ -17,8 +26,7 @@ $ scrapy crawl preciosclaros -a porcion=<PARTE>/<TOTAL_PARTES> -a exportar=1 --l
 
 Por ejemplo, si `porcion` es `1/7` (default), bajará el primer séptimo del total de sucursales, si es 2/3 bajará el segundo tercio, etc.
 
-El parámetro `exportar` es recibido por el spider y permite que un pipeline
-escriba cada item a un CSV en
+El parámetro `exportar` permite que cada item sea exportar a un CSV en
 `data/<tipo_item>-<porcion>-<cantidad_porciones-<marca_de_tiempo_inicial>.csv`
 donde tipo de item es sucursal, producto o precio.
 
@@ -45,8 +53,24 @@ testigo por cadena (Jumbo, Disco, Walmart, etc.) por cada provincia. Esto reduce
 
 ## Ejecutar en la nube
 
-
 Alternativamente, se puede ejecutar en la plataforma [Scrapy Cloud](https://scrapinghub.com/scrapy-cloud/).
+
+Una vez registrado en la plataforma, desde el directorio donde está el código
+
+```
+$ shub deploy <PROJECT_ID>
+```
+
+La primera vez se solicitará ingresar el `api-token` del proyecto. Este deploy debe hacerse por cada nueva version (o modificación local).
+
+Luego, para agendar la ejecución de un job,
+
+```
+$ shub deploy preciosclaros <args>...
+```
+
+donde args son los mismos argumentos `-a arg=val` del spider.
+
 
 
 ## Notas
