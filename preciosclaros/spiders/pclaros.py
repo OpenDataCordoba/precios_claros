@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import math
+from collections import defaultdict
 from datetime import datetime
 import scrapy
 from preciosclaros.items import SucursalItem, ProductoItem, PrecioItem
@@ -31,24 +32,44 @@ productos_url = base_url + "prod/productos"  # ?id_sucursal
 LIMIT_SUCURSALES = 30
 LIMIT_PRODUCTOS = 50
 
+
 class PreciosClarosSpider(scrapy.Spider):
     name = "preciosclaros"
 
-    def __init__(self, porcion="1/7", exportar=False, sucursales=1, productos=1, precios=1, *args, **kwargs):
+    def __init__(
+        self,
+        porcion="1/7",
+        exportar=False,
+        sucursales=1,
+        max_sucursales_por_cadena=0,
+        max_sucursales_criterio=None,
+        productos=1,
+        precios=1,
+        *args,
+        **kwargs,
+    ):
         if "/" in porcion:
             self.porcion, self.total_spiders = [int(i) for i in porcion.split("/")]
             assert 1 <= self.porcion <= self.total_spiders
         else:
             self.porcion, self.total_spiders = 1, 1
 
+        self.max_sucursales_por_cadena = int(max_sucursales_por_cadena)
+        self.max_sucursales_criterio = max_sucursales_criterio
+        self.sucursales_por_cadena = defaultdict(int)  # lleva la cuenta
+
         self.exportar = exportar
+
+        # flags para skipear items
         self.sucursales = bool(int(sucursales))
         self.productos = bool(int(productos))
         self.precios = bool(int(precios))
         super().__init__(*args, **kwargs)
 
     def start_requests(self):
-        yield scrapy.Request(url=sucursales_url + f"?limit={LIMIT_SUCURSALES}", callback=self.parse_sucursal_first_page, headers=HEADERS)
+        yield scrapy.Request(
+            url=sucursales_url + f"?limit={LIMIT_SUCURSALES}", callback=self.parse_sucursal_first_page, headers=HEADERS
+        )
 
     def parse_sucursal_first_page(self, response):
         """
@@ -90,8 +111,25 @@ class PreciosClarosSpider(scrapy.Spider):
         self.logger.info("Obteniendo sucursales %s/%s", response.meta.get("offset"), response.meta.get("end"))
         sucursales = json.loads(response.text)["sucursales"]
         for suc in sucursales:
+
             item = SucursalItem(suc)
             id_sucursal = item["id"]
+
+            # chequeo limite
+            if self.max_sucursales_por_cadena:
+                criterio = item.get(self.max_sucursales_criterio, "")
+                id_cadena = f"{item['comercioId']}-{item['banderaId']}-{criterio}"
+                self.sucursales_por_cadena[id_cadena] += 1
+                if self.sucursales_por_cadena[id_cadena] > self.max_sucursales_por_cadena:
+                    en = f" en la {self.max_sucursales_criterio} {criterio}" if self.max_sucursales_criterio else ""
+                    msg = (
+                        f"Se alcanzó el límite de {self.max_sucursales_por_cadena} "
+                        f"sucursal/es para {item['comercioRazonSocial']}{en}. "
+                        f"Sucursal {id_sucursal} ignorada."
+                    )
+                    self.logger.info(msg)
+                    continue
+
             yield item
             if self.productos:
                 yield scrapy.Request(
