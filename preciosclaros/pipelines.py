@@ -15,12 +15,13 @@ class DuplicatesPipeline(object):
 
     def process_item(self, item, spider):
         if isinstance(item, PrecioItem):
+            # los precios los queremos siempre
             return item
 
         id_ = item.get("id")
         # esto puede ocupar mucha memoria \o/
         if id_ and id_ in self.ids_seen:
-            raise DropItem(f"Duplicate item found: {id_}")
+            raise DropItem(f"producto ya bajado")
         else:
             self.ids_seen.add(id_)
             return item
