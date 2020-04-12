@@ -35,27 +35,24 @@ class MultiCSVItemPipeline:
     items = {"sucursal", "producto", "precio"}
 
     def __init__(self):
-        dispatcher.connect(self.spider_opened, signal=signals.spider_opened)
+        self.files = {}
+        self.exporters = {}
         dispatcher.connect(self.spider_closed, signal=signals.spider_closed)
 
-    def spider_opened(self, spider):
-        if not spider.exportar:
-            return
+    def open_exporter(self, spider, item_type):
+        """
+        Inicializa el archivo y el exportador de salida
+        Se invoca ante el primer
+        """
         today = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
         data = Path("data/")
         data.mkdir(exist_ok=True)
 
-        self.files = {
-            name: (data / f"{name}-{spider.porcion}-{spider.total_spiders}-{today}.csv").open("w+b") for name in MultiCSVItemPipeline.items
-        }
-        self.exporters = {name: CsvItemExporter(self.files[name]) for name in MultiCSVItemPipeline.items}
-        for e in self.exporters.values():
-            e.start_exporting()
+        self.files[item_type] = (data / f"{item_type}-{spider.porcion}-{spider.total_spiders}-{today}.csv").open("w+b")
+        self.exporters[item_type] = CsvItemExporter(self.files[item_type])
+        self.exporters[item_type].start_exporting()
 
     def spider_closed(self, spider):
-        if not spider.exportar:
-            return
-
         for e in self.exporters.values():
             e.finish_exporting()
         for f in self.files.values():
@@ -63,6 +60,11 @@ class MultiCSVItemPipeline:
 
     def process_item(self, item, spider):
         if spider.exportar:
-            what = item_type(item)
-            self.exporters[what].export_item(item)
+            self.export_item(item, spider)
         return item
+
+    def export_item(self, item, spider):
+        name = item_type(item)
+        if name not in self.files:
+            self.open_exporter(spider, name)
+        self.exporters[name].export_item(item)
