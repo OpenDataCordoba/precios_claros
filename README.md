@@ -3,6 +3,9 @@
 Un crawler (basado en Scrapy) para descargar todos los productos, precios y
 sucursales listadas en este portal de precios al consumidor.
 
+Intentamos mantener datos históricos de precios acá https://www.kaggle.com/tinnqn/precios-claros-precios-de-argentina
+
+
 ## Instalación
 
 En un virtualenv con Python 3.6+
