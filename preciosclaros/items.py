@@ -25,6 +25,16 @@ class ProductoItem(scrapy.Item):
     marca = scrapy.Field()
 
 
+class ProductoCategorizadoItem(scrapy.Item):
+    id = scrapy.Field()
+    nombre = scrapy.Field()
+    presentacion = scrapy.Field()
+    marca = scrapy.Field()
+    categoria1 = scrapy.Field()
+    categoria2 = scrapy.Field()
+    categoria3 = scrapy.Field()
+
+
 class PrecioItem(scrapy.Item):
     sucursal_id = scrapy.Field()
     producto_id = scrapy.Field()
