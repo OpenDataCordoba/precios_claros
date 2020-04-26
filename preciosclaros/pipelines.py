@@ -6,7 +6,7 @@ from scrapy import signals
 from pydispatch import dispatcher
 
 from scrapy.exceptions import DropItem
-from preciosclaros.items import PrecioItem
+from preciosclaros.items import PrecioItem, ProductoCategorizadoItem
 
 
 class DuplicatesPipeline(object):
@@ -28,6 +28,8 @@ class DuplicatesPipeline(object):
 
 
 def item_type(item):
+    if isinstance(item, ProductoCategorizadoItem):
+        return "producto_cat"
     return type(item).__name__.replace("Item", "").lower()  # TeamItem => team
 
 
