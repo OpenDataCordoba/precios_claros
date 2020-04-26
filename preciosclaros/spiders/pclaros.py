@@ -143,7 +143,8 @@ class PreciosClarosSpider(scrapy.Spider):
         json_data = json.loads(response.text)
         total = json_data["total"]
         # procesar  items de la primera pagina ya solicitada
-        self.parse_productos_y_precios(response, total)
+        for items in self.parse_productos_y_precios(response, total):
+            yield items
         id_sucursal = response.meta["id_sucursal"]
 
         for offset in range(LIMIT_PRODUCTOS, total, LIMIT_PRODUCTOS):
@@ -162,7 +163,6 @@ class PreciosClarosSpider(scrapy.Spider):
             response.meta.get("total", total),
             response.meta.get("id_sucursal"),
         )
-        self.parse_sucursal(response)
         try:
             productos = json_data["productos"]
         except KeyError:
