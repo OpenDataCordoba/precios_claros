@@ -19,6 +19,8 @@ sucursales_url = base_url + "prod/sucursales"  # ?limit=50&offset=50
 productos_url = base_url + "prod/productos"  # ?id_sucursal
 
 
+array_suc = "2-1-092,2-2-241,9-1-430,9-2-4,9-3-5218,15-1-1059,16-1-1202,10-1-46,10-2-119,25-1-1,10-3-424,12-1-165,13-1-130,2-3-246,21-1-27,29-1-7,6-1-26,6-2-1,47-1-3,1-1-7,11-5-1002,18-1-6,5-1-3,7-1-32,11-2-1022,14-1-8,11-4-1030,44-1-8,45-1-5,46-1-3,8-1-8,16-2-5904,20-1-1,17-1-242,36-3-25,36-4-51,36-5-73,36-6-40,7-2-802,23-1-6256,3-1-1716,4-1-289,49-1-2,50-1-2,24-1-292,35-1-1,65-1-328,19-1-01317"
+
 # en su membresia gratuita de Scrapinghub se impone un limite de 24hs de ejecucion por job,
 # y en ese periodo se obtienen 4millones de items, que es aproximadamente la mitad de los datos que ofrece
 # el portal precios claros
@@ -589,7 +591,7 @@ class CategoriasSpider(scrapy.Spider):
         self.total_spiders = 1
         self.url = (
             productos_url
-            + "?array_sucursales=15-1-1080,15-1-288,15-1-241,10-3-670,15-1-5173,10-3-621,10-3-587,9-3-121,9-2-30,9-1-119,9-3-5260,10-3-400,15-1-214,10-3-732,10-3-298,15-1-5197,10-3-526,12-1-116,9-2-247,15-1-90,10-3-615,15-1-446,10-3-380,10-3-563,15-1-382,10-3-616,10-3-370,10-3-533,10-3-561,15-1-492&limit=100&sort=-cant_sucursales_disponible"
+            + f"?array_sucursales={array_suc}&limit=100&sort=-cant_sucursales_disponible"
         )
         super().__init__(*args, **kwargs)
 
