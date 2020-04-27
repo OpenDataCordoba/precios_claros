@@ -74,10 +74,43 @@ $ shub deploy preciosclaros <args>...
 
 donde args son los mismos argumentos `-a arg=val` del spider.
 
+## Script auxiliares
+
+## `api.py`
+
+Provee funciones para bajar los datasets de kaggle y obtener un dataframe
+de pandas con datos cruzados de productos y sucursales.
+Requiere el cliente de [kaggle](https://github.com/Kaggle/kaggle-api)
+para bajar los datasets.
+
+```
+$ pip install kaggle
+```
+
+- Ir a https://www.kaggle.com/<username>/account y seleccionar 'Create API Token'.
+- Guardar el archivo en ~/.kaggle/kaggle.json (o en Windows C:\Users\<Windows-username>\.kaggle\kaggle.json)
+
+
+Luego,
+
+```python
+
+>>> from api import download, read_precios
+
+>>> download()
+>>> df = read_precios()
+```
+
+El `df` resultante contiene una columna de precio por csv disponible
+más cadena, provincia, producto_id, marca, nombre, categorias y la variacion absoluta y porcentual en el período.
+
+### Consolidacion
+
+`consolidar_precios.py`, `consolidar_productos.py` y
+`consolidar_sucursales.py` permiten mezclar y normalizar los CSVs
+obtenidos por el scraper en uno para subir al repositorio.
 
 
 ## Notas
 
-- El código origianal migrado del proyecto [Preciosa](https://github.com/mgaitan/preciosa).
-
-- Esta información deberia ser provista por la Secretaria de Comercio
+- El código original fue migrado del proyecto [Preciosa](https://github.com/mgaitan/preciosa).
