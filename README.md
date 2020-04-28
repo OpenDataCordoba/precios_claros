@@ -78,33 +78,35 @@ donde args son los mismos argumentos `-a arg=val` del spider.
 
 ## `api.py`
 
-Provee funciones para bajar los datasets de kaggle y obtener un dataframe
-de pandas con datos cruzados de productos y sucursales.
-Requiere el cliente de [kaggle](https://github.com/Kaggle/kaggle-api)
-para bajar los datasets.
+Provee funciones para obtener un dataframe unificado
+con datos cruzados de productos y cadenas.
 
-```
-$ pip install kaggle
-```
-
-- Ir a https://www.kaggle.com/<username>/account y seleccionar 'Create API Token'.
-- Guardar el archivo en ~/.kaggle/kaggle.json (o en Windows C:\Users\<Windows-username>\.kaggle\kaggle.json)
+Se asume que los precios de una sucursal en una provincia son
+los mismos que de cualquier otra sucursal en la misma provincia.
 
 
-Luego,
+- [Bajar el dataset](https://www.kaggle.com/tinnqn/precios-claros-precios-de-argentina/download) y descomprimir en una carpeta.
+  Alternativamente se puede instalar el CLI de Kaggle
+
+  ```
+  $ kaggle datasets download --unzip tinnqn/precios-claros-precios-de-argentina
+  ```
+
+- Luego, desde python
 
 ```python
 
->>> from api import download, read_precios
-
->>> download()
->>> df = read_precios()
+>>> from api import read_precios
+>>> df = read_precios("path/a/datasets/")
 ```
 
 El `df` resultante contiene una columna de precio por csv disponible
-más cadena, provincia, producto_id, marca, nombre, categorias y la variacion absoluta y porcentual en el período.
+más cadena, provincia, producto_id, marca, nombre producto,
+categorias (si está disponible) y la variacion absoluta y porcentual en el período
+(es decir precio más nuevo - precio más viejo).
 
-### Consolidacion
+
+### Scripts de consolidacion
 
 `consolidar_precios.py`, `consolidar_productos.py` y
 `consolidar_sucursales.py` permiten mezclar y normalizar los CSVs

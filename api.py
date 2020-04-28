@@ -35,9 +35,9 @@ def download_data():
     run(["kaggle", "datasets", "download", "--unzip", "tinnqn/precios-claros-precios-de-argentina"])
 
 
-def sucursales_prov():
+def sucursales_prov(path):
 
-    sucursales = pd.read_csv("sucursales.csv")
+    sucursales = pd.read_csv(path / "sucursales.csv")
 
     sucursales_prov = sucursales[["id", "provincia", "banderaDescripcion"]]
     sucursales_prov.rename({"banderaDescripcion": "cadena"}, axis=1, inplace=True)
@@ -57,10 +57,11 @@ def read_precio(f, sucursales_df):
     return precio
 
 
-def read_precios():
-    sucursales = sucursales_prov()
-    productos = pd.read_csv("productos.csv")
-    precios = [read_precio(f, sucursales) for f in Path(".").glob("precios_*.csv")]
+def read_precios(path="."):
+    here = Path(path)
+    sucursales = sucursales_prov(here)
+    productos = pd.read_csv(here / "productos.csv")
+    precios = [read_precio(f, sucursales) for f in Path(path).glob("precios_*.csv")]
 
     # aplico merges de todos los precios
     def merge(left, right):
