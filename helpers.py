@@ -36,11 +36,15 @@ def download_data():
 
 
 def sucursales_prov(path):
-
+    """
+    devuelve un frame que mapea el ID de sucursal a un id normalizado
+    compuesto por comercio-bandera-cod-provincia.
+    Tambien se reemplazan los códigos de las provincias por su nombre.
+    De esta manera precios de distintas sucursales pueden ser comparables
+    """
     sucursales = pd.read_csv(path / "sucursales.csv")
-
     sucursales_prov = sucursales[["id", "provincia", "banderaDescripcion"]]
-    sucursales_prov.rename({"banderaDescripcion": "cadena"}, axis=1, inplace=True)
+    sucursales_prov = sucursales_prov.rename(columns={"banderaDescripcion": "cadena"})
     sucursales_prov.replace({"provincia": iso_codes}, inplace=True)
     sucursales_prov["id_prov"] = (
         sucursales["comercioId"].astype(str) + "-" + sucursales["banderaId"].astype(str) + "-" + sucursales["provincia"]
@@ -50,14 +54,27 @@ def sucursales_prov(path):
 
 
 def read_precio(f, sucursales_df):
+    """
+    devuelve el dataset de precios del CSV "f", cruzado con
+    las sucursales (provistas por sucursales_prov())
+
+    La columna precio se renombra a precio_{fecha} donde fecha se extrae
+    del nombre del archivo.
+    """
     fecha = f.name.split("_")[-1][:-4]
     precio = pd.read_csv(f)
-    precio.rename(columns={"precio": f"precio_{fecha}"}, inplace=True)
+    precio = precio.rename(columns={"precio": f"precio_{fecha}"})
     precio = precio.join(sucursales_df, on="sucursal_id")
     return precio
 
 
 def read_precios(path="."):
+    """
+    Helper principal.
+    Lee todo los csvs del dataset para obtener un solo frame normalizado
+    y util para analizar.
+    """
+
     here = Path(path)
     sucursales = sucursales_prov(here)
     productos = pd.read_csv(here / "productos.csv")
