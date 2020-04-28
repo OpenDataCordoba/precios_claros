@@ -76,7 +76,7 @@ donde args son los mismos argumentos `-a arg=val` del spider.
 
 ## Script auxiliares
 
-## `api.py`
+### `helpers.py`
 
 Provee funciones para obtener un dataframe unificado
 con datos cruzados de productos y cadenas.
@@ -106,7 +106,7 @@ categorias (si está disponible) y la variacion absoluta y porcentual en el per�
 (es decir precio más nuevo - precio más viejo).
 
 
-### Scripts de consolidacion
+### Scripts de consolidación
 
 `consolidar_precios.py`, `consolidar_productos.py` y
 `consolidar_sucursales.py` permiten mezclar y normalizar los CSVs
@@ -115,4 +115,4 @@ obtenidos por el scraper en uno para subir al repositorio.
 
 ## Notas
 
-- El código original fue migrado del proyecto [Preciosa](https://github.com/mgaitan/preciosa).
+- El código original del scraper fue migrado del proyecto [Preciosa](https://github.com/mgaitan/preciosa).
