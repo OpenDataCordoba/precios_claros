@@ -88,7 +88,13 @@ def read_precios(path="."):
         )
 
     precios = functools.reduce(merge, precios)
-    for c in precios.columns:
+    # eliminar columnas repetidas
+    precios = precios.loc[:, ~precios.columns.duplicated()]
+    precios = precios.rename(columns={"cadena_x": "cadena"})
+
+    # elimina columnas innecesarias.
+    # basicamente sucursal_* y cadena_y  (queda cadena, renombrada antes)
+    for c in set(precios.columns):
         if c.startswith(("sucursal", "cadena_")):
             precios.drop(c, axis=1, inplace=True)
 
@@ -102,8 +108,9 @@ def read_precios(path="."):
 
     precios.sort_index(axis=1, inplace=True)
 
+    # obtenemos el periodo maximo inicio vs fin (asumiendo columnas ordenadas)
     inicio, *_, fin = [c for c in precios.columns if c.startswith("precio_")]
 
     precios["variacion"] = precios[fin] - precios[inicio]
-    precios["variacion_relativa"] = precios["variacion"].abs() / precios[inicio] * 100
+    precios["variacion_relativa"] = precios["variacion"] / precios[inicio] * 100
     return precios
