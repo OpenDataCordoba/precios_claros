@@ -45,6 +45,7 @@ class PreciosClarosSpider(scrapy.Spider):
         max_sucursales_criterio=None,
         productos=1,
         precios=1,
+        ids="",
         *args,
         **kwargs,
     ):
@@ -64,12 +65,23 @@ class PreciosClarosSpider(scrapy.Spider):
         self.sucursales = bool(int(sucursales))
         self.productos = bool(int(productos))
         self.precios = bool(int(precios))
+        self.ids = [i.strip() for i in ids.split(",") if i.strip()]
         super().__init__(*args, **kwargs)
 
     def start_requests(self):
-        yield scrapy.Request(
-            url=sucursales_url + f"?limit={LIMIT_SUCURSALES}", callback=self.parse_sucursal_first_page, headers=HEADERS
-        )
+        import ipdb;ipdb.set_trace()
+        if self.ids:
+            for id_sucursal in self.ids:
+                yield scrapy.Request(
+                        url=productos_url + f"?limit={LIMIT_PRODUCTOS}&id_sucursal={id_sucursal}",
+                        callback=self.parse_productos_first_page,
+                        headers=HEADERS,
+                        meta={"id_sucursal": id_sucursal},
+                )
+        else:
+            yield scrapy.Request(
+                url=sucursales_url + f"?limit={LIMIT_SUCURSALES}", callback=self.parse_sucursal_first_page, headers=HEADERS
+            )
 
     def parse_sucursal_first_page(self, response):
         """

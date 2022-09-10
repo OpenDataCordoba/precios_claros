@@ -54,6 +54,47 @@ Por ejemplo `-a max_sucursales_por_cadena=1 -a max_sucursales_criterio=provincia
 testigo por cadena (Jumbo, Disco, Walmart, etc.) por cada provincia. Esto reduce el volumen de datos scrapeados un 92%.
 
 
+## scrapear sucursales especificas
+
+Se pueden pasar los ids de sucursales especificas con `ids` pasando los ids separados por coma. 
+Por ejemplo, para relevar  algunos supers de la ciudad de cordoba
+
+```
+$ scrapy crawl preciosclaros -a ids="9-2-468, 1-1-1, 15-1-1060, 9-1-485" -a productos=1 -a precios=1 -a exportar=1 --loglevel=INFO
+```
+
+Para elegir los ids de las sucursales se pueden scrapear todas las disponibles con 
+
+```
+$ scrapy crawl preciosclaros -a productos=0 -a precios=0 -a porcion=1 -a exportar=1 --loglevel=INFO
+```
+
+y luego filtrar con los criterios deseados. Yo elegí las que no 
+
+```python
+>>> suc = pd.read_csv("sucursal-1-1-20220909-233315.csv")
+>>> suc[(suc.provincia == "AR-X") & (suc.localidad.isin(["CORDOBA", "Cordoba"]))].groupby(
+    ...:     "banderaDescripcion"
+    ...: ).first().reset_index()[["banderaDescripcion", "id"]]
+    ...: 
+    ...: 
+   banderaDescripcion           id
+0        Axion Energy    23-1-6255
+1            CETROGAR    2009-1-67
+2               Disco      9-2-468
+3                EASY   3001-1-120
+4                FULL   19-1-02119
+5             Fravega   2002-1-169
+6            MEGATONE    2008-1-37
+7           Musimundo   2011-1-210
+8             Samsung  2003-1-7640
+9          Super MAMI        1-1-1
+10  Supermercados DIA    15-1-1060
+11                Vea      9-1-485
+```
+
+
+
 ## Ejecutar en la nube
 
 Alternativamente, se puede ejecutar en la plataforma [Scrapy Cloud](https://scrapinghub.com/scrapy-cloud/).
